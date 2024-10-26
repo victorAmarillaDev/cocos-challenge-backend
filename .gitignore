@@ -1,0 +1,8 @@
+# Node modules
+node_modules/
+
+# Compiled TypeScript files
+build/
+
+# Environment variables
+.env
