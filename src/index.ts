@@ -1,11 +1,21 @@
+import dotenv from "dotenv"
+dotenv.config()
+
 import "reflect-metadata"
 
-import dotenv from "dotenv"
 import app from './app'
+import { AppDataSource } from './config/db'
 
+async function main(){
+  try {
+    dotenv.config()
+    await AppDataSource.initialize()
+    app.listen()
 
-dotenv.config();
+    console.log('Server is listening on port', process.env.PORT)
+  } catch (error) {
+    console.log(error)
+  }
+}
 
-app.listen()
-
-console.log('Server is listening on port', process.env.PORT)
+main()
