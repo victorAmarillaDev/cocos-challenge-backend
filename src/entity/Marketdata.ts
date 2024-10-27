@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, BaseEntity } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm'
 import { Instrument } from './Instrument'
 
 @Entity('marketdata')
@@ -6,9 +6,9 @@ export class MarketData {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => Instrument)
-  @JoinColumn({ name: 'instrumentId' })
-  instrument: Instrument
+  @ManyToOne(() => Instrument, (instrument) => instrument.id)
+  @JoinColumn({ name: 'instrumentid' })
+  instrumentId: Instrument
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   high: number
@@ -22,7 +22,7 @@ export class MarketData {
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   close: number
 
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Column('decimal', {name: 'previousclose', precision: 10, scale: 2, nullable: true })
   previousClose: number
 
   @Column('date')

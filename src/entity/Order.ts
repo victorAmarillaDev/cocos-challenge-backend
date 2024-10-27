@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, BaseEntity } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm'
 import { Instrument } from './Instrument'
 import { User } from './User'
 
@@ -7,13 +7,13 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => Instrument)
-  @JoinColumn({ name: 'instrumentId' })
-  instrument: Instrument
+  @ManyToOne(() => Instrument, (instrument) => instrument.id)
+  @JoinColumn({ name: 'instrumentid' })
+  instrumentId: Instrument
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'userid' })
+  userId: User
 
   @Column()
   size: number
