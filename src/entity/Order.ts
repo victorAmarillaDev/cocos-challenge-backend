@@ -3,7 +3,7 @@ import { Instrument } from './Instrument'
 import { User } from './User'
 
 @Entity('orders')
-export class Order  extends BaseEntity {
+export class Order {
   @PrimaryGeneratedColumn()
   id: number
 

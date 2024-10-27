@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, BaseEnti
 import { Instrument } from './Instrument'
 
 @Entity('marketdata')
-export class MarketData extends BaseEntity {
+export class MarketData {
   @PrimaryGeneratedColumn()
   id: number
 
