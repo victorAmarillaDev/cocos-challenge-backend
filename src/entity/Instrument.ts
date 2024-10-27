@@ -1,0 +1,16 @@
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm'
+
+@Entity('instruments')
+export class Instrument extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number
+
+  @Column({ length: 10 })
+  ticker: string
+
+  @Column({ length: 255 })
+  name: string
+
+  @Column({ length: 10 })
+  type: string
+}
