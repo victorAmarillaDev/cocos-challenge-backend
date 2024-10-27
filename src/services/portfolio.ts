@@ -10,7 +10,6 @@ interface OrderWithMarketData extends Omit<Order, 'instrumentId'> {
   }
 }
 
-
 interface Portfolio {
   totalAccountValue: number
   availablePesos: number
@@ -61,14 +60,27 @@ class PortfolioService {
       .getMany()
   }
 
+  private getTotalBalance(orders: OrderWithMarketData[]) {
+    return lodash.chain(orders)
+    .filter(order => ((order.side === 'BUY' || order.side == 'SELL') && order.instrumentId.type === 'ACCIONES'))
+    .sumBy(order => {
+      const size = order.size
+      const closePrice = order.instrumentId.marketdata?.close || 0
+      return size * closePrice
+    })
+    .value()
+  }
+
   public async getPortfolio(userId: number): Promise<Portfolio | undefined> {
     try {
       const assets = await this.getOrdersByUserWithMarketData(userId)
 
       const availablePesos: number = this.getAvailablePesos(assets)
 
+      const marketStockValue: number = this.getTotalBalance(assets)
+
       return {
-        totalAccountValue: 100000,
+        totalAccountValue: marketStockValue + availablePesos,
         availablePesos,
         assets,
       }
