@@ -2,88 +2,80 @@ import { AppDataSource } from '../config/db'
 import { Instrument } from '../entity/Instrument'
 import { MarketData } from '../entity/Marketdata'
 import { Order } from '../entity/Order'
+import lodash from 'lodash'
+
+interface OrderWithMarketData extends Omit<Order, 'instrumentId'> {
+  instrumentId: Instrument & {
+    marketdata?: MarketData | null;
+  }
+}
+
 
 interface Portfolio {
   totalAccountValue: number
   availablePesos: number
-  assets: Asset[]
-}
-
-interface Asset {
-  ticker: string
-  name: string
-  quantity: number
-  totalValue: number
-  totalReturn: number
+  assets: OrderWithMarketData[]
 }
 
 class PortfolioService {
   private ordersRepository = AppDataSource.getRepository(Order)
-  private marketDataRepository = AppDataSource.getRepository(MarketData)
-  private instrumentsRepository = AppDataSource.getRepository(Instrument)
 
-  private async getAvailablePesos(userId: number): Promise<number> {
-    const result = await this.ordersRepository.createQueryBuilder("o")
-      .select(
-        `CAST(
-          SUM(
-            CASE
-              WHEN o.side = 'CASH_IN' THEN COALESCE(o.size, 0) * COALESCE(o.price, 0)
-              WHEN o.side = 'CASH_OUT' THEN -COALESCE(o.size, 0) * COALESCE(o.price, 0)
-              WHEN o.side = 'BUY' THEN -COALESCE(o.size, 0) * COALESCE(o.price, 0)
-              WHEN o.side = 'SELL' THEN COALESCE(o.size, 0) * COALESCE(o.price, 0)
-              ELSE 0
-            END
-          ) AS FLOAT
-        ) AS balance`
-      )
-      .where('o.status = :status', { status: 'FILLED' })
-      .andWhere('o.userId = :userId', { userId })
-      .getRawOne();
+  private getAvailablePesos(orders: OrderWithMarketData[]): number {
+    return lodash.chain(orders)
+      .sumBy((order: OrderWithMarketData) => {
+        const size = order.size
+        const price = parseFloat(order.price) || 0
+        const orderValue = size * price
 
-    return result.balance || 0;
+        switch (order.side) {
+          case 'CASH_IN':
+            return orderValue
+          case 'CASH_OUT':
+          case 'BUY':
+            return -orderValue
+          case 'SELL':
+            return orderValue
+          default:
+            return 0
+        }
+      })
+      .value()
   }
 
-  
+  private async getOrdersByUserWithMarketData(userId: number): Promise<OrderWithMarketData[]> {
+    return await this.ordersRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.instrumentId', 'instrument')
+      .leftJoinAndMapOne(
+        'instrument.marketdata',
+        'MarketData',
+        'marketdata',
+        `marketdata.instrumentId = instrument.id AND marketdata.date = (
+          SELECT MAX(m.date) 
+          FROM marketdata m 
+          WHERE m.instrumentId = instrument.id
+        )`
+      )
+      .where('order.userId = :userId', { userId })
+      .andWhere('order.status = :status', { status: 'FILLED' })
+      .getMany()
+  }
 
-  public async getPortfolio(userId: number) {
+  public async getPortfolio(userId: number): Promise<Portfolio | undefined> {
     try {
+      const assets = await this.getOrdersByUserWithMarketData(userId)
 
-      const availablePesos = this.getAvailablePesos(userId)
-    
+      const availablePesos: number = this.getAvailablePesos(assets)
 
-      return Promise.resolve({
+      return {
         totalAccountValue: 100000,
         availablePesos,
-        assets: [
-          {
-            ticker: 'AAPL',
-            name: 'Apple Inc.',
-            quantity: 10,
-            totalValue: 15000,
-            totalReturn: 2000
-          },
-          {
-            ticker: 'TSLA',
-            name: 'Tesla Inc.',
-            quantity: 5,
-            totalValue: 25000,
-            totalReturn: 5000
-          },
-          {
-            ticker: 'MSFT',
-            name: 'Microsoft Corp.',
-            quantity: 8,
-            totalValue: 30000,
-            totalReturn: 3500
-          }
-        ]
-      })
-
+        assets,
+      }
     } catch (error) {
       console.log(error)
+      return undefined
     }
-
   }
 }
 

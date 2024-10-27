@@ -19,7 +19,7 @@ export class Order {
   size: number
 
   @Column('decimal', { precision: 10, scale: 2 })
-  price: number
+  price: string
 
   @Column({ length: 10 })
   type: string
