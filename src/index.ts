@@ -10,7 +10,7 @@ async function main(){
   try {
     dotenv.config()
     await AppDataSource.initialize()
-    app.listen()
+    app.listen(process.env.PORT)
 
     console.log('Server is listening on port', process.env.PORT)
   } catch (error) {
