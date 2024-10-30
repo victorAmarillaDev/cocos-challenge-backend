@@ -1,24 +1,23 @@
-
 import { AppDataSource } from '../config/db'
-import { MarketData } from '../entity/Marketdata'
 import { Order } from '../entity/Order'
-import { User } from '../entity/User'
-
-interface OrderParams {
-  userId: number
-  instrumentId: number
-  side: 'BUY' | 'SELL' | 'CASH_IN' | 'CASH_OUT'
-  size: number
-  price?: number
-  type: 'MARKET' | 'LIMIT'
-}
+import { OrderParams } from '../interfaces/order'
+import { DeepPartial } from 'typeorm'
 
 class OrderService {
   private orderRepository = AppDataSource.getRepository(Order)
-  private marketDataRepo = AppDataSource.getRepository(MarketData)
 
   public async createOrder(order: OrderParams) {
-    
+    const { userId, instrumentId, ...orderData } = order
+
+    const newOrder: DeepPartial<Order> = {
+      ...orderData,
+      instrumentId: { id: instrumentId },
+      userId: { id: userId },
+      price: order.price.toString(),
+      datetime: new Date()
+    }
+
+    return this.orderRepository.create(newOrder)
 
   }
   

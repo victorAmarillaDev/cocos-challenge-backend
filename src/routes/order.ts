@@ -1,9 +1,10 @@
 import { Router } from 'express'
-import { validateUserExists } from '../middlewares/user'
+import { validateFunds, validateUserExists } from '../middlewares/user'
 import OrderController from '../controllers/order'
+import { validateOrderRequest } from '../middlewares/order'
 
 const router = Router()
 
-router.post('/:userId', validateUserExists, OrderController.createOrder)
+router.post('/:userId', validateOrderRequest, validateUserExists, validateFunds, OrderController.createOrder)
 
 export default router

@@ -7,6 +7,6 @@ const router = Router()
 
 router.use('/portfolio', portfolioRouter)
 router.use('/instrument', assetsRoutes)
-router.use('/orders', ordersRoutes)
+router.use('/order', ordersRoutes)
 
 export default router

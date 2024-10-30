@@ -1,5 +1,5 @@
-import { AppDataSource } from '../config/db';
-import { Order } from '../entity/Order';
+import { AppDataSource } from '../config/db'
+import { Order } from '../entity/Order'
 
 export async function userHasSufficientActionInstruments(
   userId: number,
@@ -19,7 +19,7 @@ export async function userHasSufficientActionInstruments(
   return result?.balance >= size
 }
 
-export async function userHasSufficientPesos(userId: number, size: number): Promise<boolean> {
+export async function userHasSufficientPesos(userId: number, pesosNeed: number): Promise<boolean> {
   const orderRepository = AppDataSource.getRepository(Order)
   const result = await orderRepository
     .createQueryBuilder("o")
@@ -38,7 +38,7 @@ export async function userHasSufficientPesos(userId: number, size: number): Prom
     `)
     .where('o.status = :status', { status: 'FILLED' })
     .andWhere('o.userId = :userId', { userId })
-    .getRawOne();
+    .getRawOne()
 
-  return result?.balance > size
+  return result?.balance >= pesosNeed
 }

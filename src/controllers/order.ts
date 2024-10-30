@@ -5,14 +5,12 @@ import OrderService from '../services/order'
 class OrderController {
   static async createOrder(req: Request, res: Response) {
     const userId = parseInt(req.params.userId)
-    const order = req.body
+    const orderData = req.body 
 
     try {
+      const newOrder = await OrderService.createOrder({ ...orderData, userId })
 
-      await OrderService.createOrder({ userId, ...order })
-
-      res.status(200).json({  })
-
+      res.status(200).json({ order: newOrder })
     } catch (error: any) {
       res.status(500).json({ message: error.message })
     }
