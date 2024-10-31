@@ -35,14 +35,13 @@ export const validateFunds = async (req: Request, res: Response, next: NextFunct
   if (!userId) return
 
   try {
-    const hasSufficientFunds = side === 'BUY'
+    const hasSufficientFunds = (side === 'BUY')
       ? await userHasSufficientPesos(userId, size * price)
       : await userHasSufficientActionInstruments(userId, instrumentId, size)
 
-    if (hasSufficientFunds) return next()
+     if (!hasSufficientFunds) req.body.status = 'REJECTED'
 
-    res.status(404).json({ error: 'Insufficient funds' })
-    return
+    return next()
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' })
     return
