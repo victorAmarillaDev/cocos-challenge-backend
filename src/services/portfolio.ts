@@ -6,7 +6,7 @@ import lodash from 'lodash'
 
 interface OrderWithMarketData extends Omit<Order, 'instrumentId'> {
   instrumentId: Instrument & {
-    marketdata?: MarketData | null
+    marketdata?: MarketData
   }
 }
 
@@ -34,12 +34,11 @@ class PortfolioService {
 
         switch (order.side) {
           case 'CASH_IN':
+          case 'SELL':
             return orderValue
           case 'CASH_OUT':
           case 'BUY':
             return -orderValue
-          case 'SELL':
-            return orderValue
           default:
             return 0
         }
@@ -68,15 +67,15 @@ class PortfolioService {
 
   private getTotalBalance(orders: OrderWithMarketData[]) {
     return lodash.chain(orders)
-      .filter(order => 
-        (order.side === 'BUY' || order.side === 'SELL') && 
+      .filter(order =>
+        (order.side === 'BUY' || order.side === 'SELL') &&
         order.instrumentId.type === 'ACCIONES'
       )
       .groupBy(order => order.instrumentId.ticker)
       .map((orders) => {
         const marketData = orders[0].instrumentId.marketdata
         const closePrice = marketData?.close || 0
-  
+
         const totalQuantity = lodash.sumBy(orders, order =>
           order.side === 'BUY' ? order.size : -order.size
         )
@@ -87,40 +86,40 @@ class PortfolioService {
       .sum()
       .value()
   }
-  
+
   private getAssets(orders: OrderWithMarketData[]): assetsResponse[] {
     const assets = lodash.chain(orders)
       .filter(order => (order.side === 'BUY' || order.side === 'SELL') && order.instrumentId.type === 'ACCIONES')
       .groupBy(order => order.instrumentId.ticker)
       .map((listOrder) => {
         const { ticker, name, type, id } = listOrder[0].instrumentId
-  
+
         const totalBought = lodash.sumBy(listOrder.filter(o => o.side === 'BUY'), order => order.size)
         const totalSold = lodash.sumBy(listOrder.filter(o => o.side === 'SELL'), order => order.size)
         const quantity = totalBought - totalSold
-  
+
         if (quantity <= 0) return null
-  
+
         const currentClosePrice = listOrder[0].instrumentId.marketdata?.close ?? 0
         const currentValue = quantity * currentClosePrice
-  
+
         // Método FIFO
         let remainingQuantity = quantity
         let totalPurchaseValue = 0
-  
+
         for (const order of listOrder.filter(o => o.side === 'BUY')) {
           if (remainingQuantity <= 0) break
-  
+
           const buyQuantity = Math.min(order.size, remainingQuantity)
-          
+
           totalPurchaseValue += buyQuantity * parseFloat(order.price)
           remainingQuantity -= buyQuantity
         }
-  
-        const performance = totalPurchaseValue > 0 
-          ? ((currentValue - totalPurchaseValue) / totalPurchaseValue) * 100 
+
+        const performance = totalPurchaseValue > 0
+          ? ((currentValue - totalPurchaseValue) / totalPurchaseValue) * 100
           : 0
-  
+
         return {
           id,
           ticker,
@@ -133,7 +132,7 @@ class PortfolioService {
       })
       .filter(stock => stock !== null)
       .value() as assetsResponse[]
-  
+
     return assets
   }
 

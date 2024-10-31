@@ -17,7 +17,7 @@ class OrderService {
       datetime: new Date()
     }
 
-    return this.orderRepository.create(newOrder)
+    return this.orderRepository.save(newOrder)
 
   }
   

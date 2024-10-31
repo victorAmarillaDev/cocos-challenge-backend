@@ -1,8 +1,5 @@
 import { z } from 'zod'
-
-export const ParamsUserIdSchema = z.object({
-  userId: z.string().regex(/^\d+$/, 'userId must be a valid numeric string').transform(Number),
-})
+import { getLastPrice } from '../utils/instrument'
 
 export const OrderCreateSchema = z.object({
   instrumentId: z.number().positive().int(),
@@ -10,20 +7,34 @@ export const OrderCreateSchema = z.object({
   size: z.number().positive().int(),
   price: z.number().positive().optional(),
   type: z.enum(['LIMIT', 'MARKET']),
-  status: z.enum(['NEW', 'FILLED', 'REJECTED', 'CANCELLED'])
+  userId: z.number().positive().int(),
+  status: z.enum(['NEW', 'FILLED', 'REJECTED', 'CANCELLED']).optional()
+}).superRefine(async (order, ctx) => {
+
+  if ((order.side === 'BUY' || order.side === 'SELL') && order.type === 'MARKET') {
+    const price = await getLastPrice(order.instrumentId)
+    if (!price) {
+      ctx.addIssue({
+        code: "custom",
+        path: ['Instrument'],
+        message: 'Instrument not found'
+      })
+    }
+    order.price = price?.close
+    order.status = 'FILLED'
+  }
+
+  if (order.type === 'LIMIT' && !order.price) {
+    ctx.addIssue({
+      code: "custom",
+      path: ['Price'],
+      message: 'Price is required for LIMIT orders'
+    })
+  }
 })
 
+export const createOrderSchema = z.object({
+  body: OrderCreateSchema,
+})
 
-export const EnhancedOrderSchema = OrderCreateSchema.refine(
-  (order) => {
-    console.log(order)
-    if (order.type === 'LIMIT' && !order.price) return false
-    if (order.type === 'MARKET' && order.status !== 'FILLED') return false
-    if (order.side === 'SELL' && !order.instrumentId) return false
-    return true
-  },
-  {
-    message: 'Invalid order structure',
-  }
-)
-
+export type ICreateOrderSchema = z.infer<typeof createOrderSchema>

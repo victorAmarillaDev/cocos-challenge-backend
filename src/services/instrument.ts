@@ -8,9 +8,9 @@ type InstrumentsResponse = Instrument[]
 class InstrumentsService {
   private instrumentRepository = AppDataSource.getRepository(Instrument)
 
-  public async getSimilarInstruments(ticker: string | undefined, name: string | undefined) : Promise<InstrumentsResponse>  {
+  public async getSimilarInstruments(ticker?: string, name?: string) : Promise<InstrumentsResponse>  {
     
-    const where : FindOptionsWhere <Instrument>[] = []
+    const where: FindOptionsWhere<Instrument>[] = []
 
     if (ticker) {
       where.push({ ticker: ILike(`%${ticker.trim()}%`) })

@@ -5,6 +5,6 @@ import { validateOrderRequest } from '../middlewares/order'
 
 const router = Router()
 
-router.post('/:userId', validateOrderRequest, validateUserExists, validateFunds, OrderController.createOrder)
+router.post('/', validateOrderRequest, validateUserExists, validateFunds, OrderController.createOrder)
 
 export default router
