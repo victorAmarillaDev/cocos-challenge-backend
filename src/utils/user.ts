@@ -9,11 +9,11 @@ export async function userHasSufficientActionInstruments(
   const orderRepository = AppDataSource.getRepository(Order)
 
   const result = await orderRepository
-    .createQueryBuilder('order')
-    .select(`SUM(CASE WHEN order.side = 'BUY' THEN order.size ELSE -order.size END), balance`)
-    .where('order.userId = :userId', { userId })
-    .andWhere('order.instrumentId = :instrumentId', { instrumentId })
-    .andWhere('order.status = :status', { status: 'FILLED' })
+    .createQueryBuilder('o')
+    .select(`SUM(CASE WHEN o.side = 'BUY' THEN o.size ELSE -o.size END)`, 'balance')
+    .where('o.userId = :userId', { userId })
+    .andWhere('o.instrumentId = :instrumentId', { instrumentId })
+    .andWhere('o.status = :status', { status: 'FILLED' })
     .getRawOne()
 
   return result?.balance >= size

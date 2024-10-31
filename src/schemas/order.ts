@@ -24,6 +24,10 @@ export const OrderCreateSchema = z.object({
     order.status = 'FILLED'
   }
 
+  if (order.type === 'LIMIT') {
+    order.status = 'NEW'
+  }
+
   if (order.type === 'LIMIT' && !order.price) {
     ctx.addIssue({
       code: "custom",
