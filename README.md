@@ -36,7 +36,7 @@ API developed as a solution for the Cocos Challenge Backend. Its purpose is to m
 
 Start the API:
    ```bash
-   npm run start
+   npm run dev
    ```
 
 ## Project Structure
