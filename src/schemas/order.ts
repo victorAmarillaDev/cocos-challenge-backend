@@ -41,6 +41,8 @@ export const OrderCreateSchema = z.object({
 
 export const createOrderSchema = z.object({
   body: OrderCreateSchema,
+  query: z.object({}),
+  params: z.object({})
 })
 
 export type ICreateOrderSchema = z.infer<typeof createOrderSchema>
