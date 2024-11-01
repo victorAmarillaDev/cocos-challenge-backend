@@ -12,7 +12,7 @@ interface OrderWithMarketData extends Omit<Order, 'instrumentId'> {
 
 interface instrumentsResponse extends Instrument {
   quantity: number,
-  totalValue: number,
+  currentBalance: number,
   performance: number
 }
 
@@ -126,7 +126,7 @@ class PortfolioService {
           name,
           type,
           quantity,
-          totalValue: currentValue,
+          currentBalance: currentValue,
           performance
         }
       })
