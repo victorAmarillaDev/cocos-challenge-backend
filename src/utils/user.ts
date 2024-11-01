@@ -1,13 +1,16 @@
 import { AppDataSource } from '../config/db'
 import { Order } from '../entity/Order'
+import { User } from '../entity/User'
 import { OrderStatus } from '../enums/order'
+
+const orderRepository = AppDataSource.getRepository(Order)
+const userRepository = AppDataSource.getRepository(User)
 
 export async function userHasSufficientActionInstruments(
   userId: number,
   instrumentId: number,
   size: number
 ): Promise<boolean> {
-  const orderRepository = AppDataSource.getRepository(Order)
 
   const result = await orderRepository
     .createQueryBuilder('o')
@@ -21,7 +24,6 @@ export async function userHasSufficientActionInstruments(
 }
 
 export async function userHasSufficientPesos(userId: number, pesosNeed: number): Promise<boolean> {
-  const orderRepository = AppDataSource.getRepository(Order)
   const result = await orderRepository
     .createQueryBuilder("o")
     .select(`
@@ -42,4 +44,10 @@ export async function userHasSufficientPesos(userId: number, pesosNeed: number):
     .getRawOne()
 
   return result?.balance >= pesosNeed
+}
+
+export async function checkUserExists(id: number) {
+  return userRepository.exists({
+    where: { id }
+  })
 }
