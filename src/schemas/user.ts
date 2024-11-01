@@ -5,7 +5,9 @@ export const UserParamsSchema = z.object({
 })
 
 export const paramsUserSchema = z.object({
-  params: UserParamsSchema
+  params: UserParamsSchema,
+  body: z.object({}),
+  query: z.object({})
 })
 
 export type IParamsUser = z.infer<typeof paramsUserSchema>

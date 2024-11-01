@@ -10,7 +10,9 @@ export const InstrumentSearchQuerySchema = z.object({
 })
 
 export const searchQueryInstrumentSchema = z.object({
-  query: InstrumentSearchQuerySchema
+  query: InstrumentSearchQuerySchema,
+  body: z.object({}),
+  params: z.object({})
 })
 
 export type IParamsUser = z.infer<typeof searchQueryInstrumentSchema>
