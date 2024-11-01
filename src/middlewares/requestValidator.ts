@@ -43,7 +43,7 @@ export const paramsUserValidator = async <T extends ZodSchema<{ params: any }>>(
     const userExists = await checkUserExists(result.data.params.userId)
 
     if (!userExists) {
-      res.status(400).json({ message: 'User not found'})
+      res.status(404).json({ message: 'User not found'})
       return
     }
 
