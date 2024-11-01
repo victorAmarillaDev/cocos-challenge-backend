@@ -1,10 +1,11 @@
 import { Request, Response } from 'express'
 import OrderService from '../services/order'
+import { IOrderData } from '../interfaces/order'
 
 
 class OrderController {
   static async createOrder(req: Request, res: Response) {
-    const orderData = req.body 
+    const orderData: IOrderData = req.body 
 
     try {
       const newOrder = await OrderService.createOrder(orderData)

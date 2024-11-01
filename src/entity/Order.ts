@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm'
 import { Instrument } from './Instrument'
 import { User } from './User'
+import { OrderType, OrderSide, OrderStatus } from '../enums/order'
 
 @Entity('orders')
 export class Order {
@@ -21,15 +22,30 @@ export class Order {
   @Column('decimal', { precision: 10, scale: 2 })
   price: string
 
-  @Column({ length: 10 })
-  type: string
+  @Column({
+    type: 'enum',
+    enum: OrderType
+  })
+  type: OrderType
 
-  @Column({ length: 10 })
-  side: string
+  @Column({
+    type: 'enum',
+    enum: OrderSide
+  })
+  side: OrderSide
 
-  @Column({ length: 20 })
-  status: string
+  @Column({
+    type: 'enum',
+    enum: OrderStatus
+  })
+  status: OrderStatus
 
-  @Column('timestamp')
-  datetime: Date
+  @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP', name: 'datetime'  })
+  dateTime: Date
+}
+
+export type IOrder = InstanceType<typeof Order>
+export type IOrderCreate = Omit<IOrder, 'instrumentId' | 'userId'> & {
+  instrumentId: { id: number },
+  userId: { id: number }
 }

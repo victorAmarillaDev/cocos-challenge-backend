@@ -1,5 +1,6 @@
 import { AppDataSource } from '../config/db'
 import { Order } from '../entity/Order'
+import { OrderStatus } from '../enums/order'
 
 export async function userHasSufficientActionInstruments(
   userId: number,
@@ -13,7 +14,7 @@ export async function userHasSufficientActionInstruments(
     .select(`SUM(CASE WHEN o.side = 'BUY' THEN o.size ELSE -o.size END)`, 'balance')
     .where('o.userId = :userId', { userId })
     .andWhere('o.instrumentId = :instrumentId', { instrumentId })
-    .andWhere('o.status = :status', { status: 'FILLED' })
+    .andWhere('o.status = :status', { status: OrderStatus.FILLED })
     .getRawOne()
 
   return result?.balance >= size
@@ -36,7 +37,7 @@ export async function userHasSufficientPesos(userId: number, pesosNeed: number):
         ) AS FLOAT
       ) AS balance
     `)
-    .where('o.status = :status', { status: 'FILLED' })
+    .where('o.status = :status', { status: OrderStatus.FILLED })
     .andWhere('o.userId = :userId', { userId })
     .getRawOne()
 
