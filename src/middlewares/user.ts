@@ -2,7 +2,7 @@ import { NextFunction, Response, Request } from 'express'
 import { checkUserExists, userHasSufficientActionInstruments, userHasSufficientPesos } from '../utils/user'
 import { OrderSide, OrderStatus } from '../enums/order'
 import { paramsUserSchema } from '../schemas/user'
-import { paramsUserValidator } from './requestValidator'
+import {  requestValidator } from './requestValidator'
 import { CustomErrorCodeEnum, ErrorCodeEnum, StatusCodeEnum } from '../enums/http'
 
 export const validateUserAndFunds = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -29,5 +29,5 @@ export const validateUserAndFunds = async (req: Request, res: Response, next: Ne
 }
 
 export const validateParamsUser = (req: Request, res: Response, next: NextFunction): void => {
-  paramsUserValidator(req, res, next, paramsUserSchema)
+  requestValidator(req, res, next, paramsUserSchema)
 }
