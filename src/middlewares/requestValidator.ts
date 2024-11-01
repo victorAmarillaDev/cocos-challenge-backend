@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { ZodSchema } from 'zod'
+import { ZodError, ZodSchema } from 'zod'
 import { ErrorCodeEnum, StatusCodeEnum } from '../enums/http'
 
 export const requestValidator = async <T extends ZodSchema<{ body?: any, params?: any, query?: any }>>(
@@ -23,8 +23,16 @@ export const requestValidator = async <T extends ZodSchema<{ body?: any, params?
     req.query = validatedRequest.query
 
     next()
-  } catch (error: any) {
-    res.status(StatusCodeEnum.BAD_REQUEST).json({ message: ErrorCodeEnum.BAD_REQUEST, description: error.message })
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(StatusCodeEnum.BAD_REQUEST).json({
+        error: error?.errors[0]?.message
+      })
+    } else {
+      res.status(StatusCodeEnum.INTERNAL_SERVER_ERROR).json({
+        message: ErrorCodeEnum.INTERNAL_SERVER_ERROR
+      })
+    }
     return
   }
 }
