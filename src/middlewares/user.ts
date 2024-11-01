@@ -27,11 +27,10 @@ export const validateParamsUser = (req: Request, res: Response, next: NextFuncti
 }
 
 export const validateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const userId = req.params.userId as unknown as number
+  const userId = req.params.userId || req.body.userId
 
   try {
-    const user = await checkUserExists(userId)
-
+    const user = await checkUserExists(userId as unknown as number)
     if (!user) {
       res.status(StatusCodeEnum.NOT_FOUND).json({ error: CustomErrorCodeEnum.USER_NOT_FOUND })
       return

@@ -19,13 +19,6 @@ export const OrderCreateSchema = z.object({
 }).superRefine(async (order, ctx) => {
   if ((order.side === OrderSide.BUY || order.side === OrderSide.SELL) && order.type === OrderType.MARKET) {
     const price = await getLastPrice(order.instrumentId)
-    if (!price) {
-      ctx.addIssue({
-        code: "custom",
-        path: ['instrumentId'],
-        message: CustomErrorCodeEnum.INSTRUMENT_NOT_FOUND
-      })
-    }
     order.price = price?.close
     order.status = OrderStatus.FILLED
   }

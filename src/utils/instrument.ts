@@ -1,8 +1,10 @@
 import { FindOptionsWhere } from 'typeorm'
 import { AppDataSource } from '../config/db'
 import { MarketData } from '../entity/Marketdata'
+import { Instrument } from '../entity/Instrument'
 
 const marketDataRepository = AppDataSource.getRepository(MarketData)
+const instrumentRepository = AppDataSource.getRepository(Instrument)
 
 export async function getLastPrice(id: number): Promise<MarketData | null> {
   const whereOptions: FindOptionsWhere<Pick<MarketData, 'instrumentId'>> = { instrumentId: { id } }
@@ -13,4 +15,10 @@ export async function getLastPrice(id: number): Promise<MarketData | null> {
   })
 
   return instrumentData
+}
+
+export async function checkInstrumentExists(id: number) {
+  return instrumentRepository.exists({
+    where: { id }
+  })
 }
