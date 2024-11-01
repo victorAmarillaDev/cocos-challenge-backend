@@ -78,7 +78,7 @@ describe('POST /api/order - Create Order', () => {
       .post('/api/order')
       .send(orderData)
   
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(404)
     expect(response.body).toEqual({
       error: 'INSTRUMENT_NOT_FOUND'
     })
