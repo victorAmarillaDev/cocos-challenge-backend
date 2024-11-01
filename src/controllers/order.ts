@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import OrderService from '../services/order'
 import { IOrderData } from '../interfaces/order'
+import { ErrorCodeEnum, StatusCodeEnum } from '../enums/http'
 
 
 class OrderController {
@@ -10,10 +11,10 @@ class OrderController {
     try {
       const newOrder = await OrderService.createOrder(orderData)
 
-      res.status(200).json({ order: newOrder })
+      res.status(StatusCodeEnum.CREATED).json({ order: newOrder })
       return
     } catch (error: any) {
-      res.status(500).json({ message: error.message })
+      res.status(StatusCodeEnum.INTERNAL_SERVER_ERROR).json({ error: ErrorCodeEnum.INTERNAL_SERVER_ERROR })
     }
   }
 }

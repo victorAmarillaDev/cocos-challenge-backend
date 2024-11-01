@@ -137,23 +137,18 @@ class PortfolioService {
   }
 
   public async getPortfolio(userId: number): Promise<Portfolio | undefined> {
-    try {
-      const instruments = await this.getOrdersByUserWithMarketData(userId)
+    const instruments = await this.getOrdersByUserWithMarketData(userId)
 
-      const availablePesos: number = this.getAvailablePesos(instruments)
+    const availablePesos: number = this.getAvailablePesos(instruments)
 
-      const marketStockValue: number = this.getTotalBalance(instruments)
+    const marketStockValue: number = this.getTotalBalance(instruments)
 
-      const listinstruments = this.getinstruments(instruments)
+    const listinstruments = this.getinstruments(instruments)
 
-      return {
-        totalAccountValue: marketStockValue + availablePesos,
-        availablePesos,
-        instruments: listinstruments,
-      }
-    } catch (error) {
-      console.log(error)
-      return
+    return {
+      totalAccountValue: marketStockValue + availablePesos,
+      availablePesos,
+      instruments: listinstruments,
     }
   }
 }
