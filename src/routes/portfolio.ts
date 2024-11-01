@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import Portfolio from '../controllers/portfolio'
-import { validateParamsUser, validateUserExists } from '../middlewares/user'
+import { validateParamsUser } from '../middlewares/user'
 
 const router = Router()
 
