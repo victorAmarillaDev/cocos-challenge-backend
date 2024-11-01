@@ -20,6 +20,13 @@ export const OrderCreateSchema = z.object({
   if ((order.side === OrderSide.BUY || order.side === OrderSide.SELL) && order.type === OrderType.MARKET) {
     const price = await getLastPrice(order.instrumentId)
     order.price = price?.close
+    if (!order.price) {
+      ctx.addIssue({
+        code: "custom",
+        path: ['instrumentId'],
+        message: CustomErrorCodeEnum.INSTRUMENT_NOT_FOUND
+      })
+    }
     order.status = OrderStatus.FILLED
   }
 
