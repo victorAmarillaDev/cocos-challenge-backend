@@ -103,7 +103,7 @@ class PortfolioService {
         const currentClosePrice = listOrder[0].instrumentId.marketdata?.close ?? 0
         const currentValue = quantity * currentClosePrice
 
-        // Método FIFO
+        // First In, First Out
         let remainingQuantity = quantity
         let totalPurchaseValue = 0
 
