@@ -3,6 +3,6 @@ import InstrumentsController from '../controllers/instrument'
 
 const router = Router()
 
-router.get('/search', InstrumentsController.getInstruments )
+router.get('/search', InstrumentsController.getInstruments)
 
 export default router

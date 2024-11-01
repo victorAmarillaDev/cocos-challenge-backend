@@ -10,7 +10,7 @@ interface OrderWithMarketData extends Omit<Order, 'instrumentId'> {
   }
 }
 
-interface assetsResponse extends Instrument {
+interface instrumentsResponse extends Instrument {
   quantity: number,
   totalValue: number,
   performance: number
@@ -19,7 +19,7 @@ interface assetsResponse extends Instrument {
 interface Portfolio {
   totalAccountValue: number
   availablePesos: number
-  assets: assetsResponse[]
+  instruments: instrumentsResponse[]
 }
 
 class PortfolioService {
@@ -87,8 +87,8 @@ class PortfolioService {
       .value()
   }
 
-  private getAssets(orders: OrderWithMarketData[]): assetsResponse[] {
-    const assets = lodash.chain(orders)
+  private getinstruments(orders: OrderWithMarketData[]): instrumentsResponse[] {
+    const instruments = lodash.chain(orders)
       .filter(order => (order.side === 'BUY' || order.side === 'SELL') && order.instrumentId.type === 'ACCIONES')
       .groupBy(order => order.instrumentId.ticker)
       .map((listOrder) => {
@@ -131,29 +131,29 @@ class PortfolioService {
         }
       })
       .filter(stock => stock !== null)
-      .value() as assetsResponse[]
+      .value() as instrumentsResponse[]
 
-    return assets
+    return instruments
   }
 
   public async getPortfolio(userId: number): Promise<Portfolio | undefined> {
     try {
-      const assets = await this.getOrdersByUserWithMarketData(userId)
+      const instruments = await this.getOrdersByUserWithMarketData(userId)
 
-      const availablePesos: number = this.getAvailablePesos(assets)
+      const availablePesos: number = this.getAvailablePesos(instruments)
 
-      const marketStockValue: number = this.getTotalBalance(assets)
+      const marketStockValue: number = this.getTotalBalance(instruments)
 
-      const listAssets = this.getAssets(assets)
+      const listinstruments = this.getinstruments(instruments)
 
       return {
         totalAccountValue: marketStockValue + availablePesos,
         availablePesos,
-        assets: listAssets,
+        instruments: listinstruments,
       }
     } catch (error) {
       console.log(error)
-      return undefined
+      return
     }
   }
 }
