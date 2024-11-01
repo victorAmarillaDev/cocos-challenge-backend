@@ -3,6 +3,7 @@ import { checkUserExists, userHasSufficientActionInstruments, userHasSufficientP
 import { OrderSide, OrderStatus } from '../enums/order'
 import { paramsUserSchema } from '../schemas/user'
 import { paramsUserValidator } from './requestValidator'
+import { CustomErrorCodeEnum, ErrorCodeEnum, StatusCodeEnum } from '../enums/http'
 
 export const validateUserAndFunds = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId, size, price, side, instrumentId } = req.body
@@ -11,7 +12,7 @@ export const validateUserAndFunds = async (req: Request, res: Response, next: Ne
     const user = await checkUserExists(userId)
 
     if (!user) {
-      res.status(404).json({ error: 'User not found' })
+      res.status(StatusCodeEnum.NOT_FOUND).json({ error: CustomErrorCodeEnum.USER_NOT_FOUND })
       return
     }
 
@@ -23,7 +24,7 @@ export const validateUserAndFunds = async (req: Request, res: Response, next: Ne
 
     next()
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' })
+    res.status(StatusCodeEnum.INTERNAL_SERVER_ERROR).json({ error: ErrorCodeEnum.INTERNAL_SERVER_ERROR })
   }
 }
 

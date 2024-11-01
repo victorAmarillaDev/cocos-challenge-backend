@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import InstrumentsService from '../services/instrument'
+import { ErrorCodeEnum, StatusCodeEnum } from '../enums/http'
 
 class InstrumentsController {
   static async getInstruments(req: Request, res: Response) {
@@ -9,9 +10,9 @@ class InstrumentsController {
     try {
       const instruments = await InstrumentsService.getSimilarInstruments(ticker, name)
 
-      res.status(200).json({ instruments })
-    } catch (error: any) {
-      res.status(500).json({ message: error.message })
+      res.status(StatusCodeEnum.OK).json({ instruments })
+    } catch (error) {
+      res.status(StatusCodeEnum.INTERNAL_SERVER_ERROR).json({ error: ErrorCodeEnum.INTERNAL_SERVER_ERROR })
     }
   }
 }

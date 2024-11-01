@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { getLastPrice } from '../utils/instrument'
 import { OrderSide, OrderType, OrderStatus } from '../enums/order'
+import { CustomErrorCodeEnum } from '../enums/http'
 
 export const OrderCreateSchema = z.object({
   instrumentId: z.number().positive().int(),
@@ -18,7 +19,7 @@ export const OrderCreateSchema = z.object({
       ctx.addIssue({
         code: "custom",
         path: ['instrumentId'],
-        message: 'Instrument not found'
+        message: CustomErrorCodeEnum.INSTRUMENT_NOT_FOUND
       })
     }
     order.price = price?.close
@@ -33,7 +34,7 @@ export const OrderCreateSchema = z.object({
     ctx.addIssue({
       code: "custom",
       path: ['price'],
-      message: 'Price is required for LIMIT orders'
+      message: CustomErrorCodeEnum.PRICE_REQUIRED_FOR_LIMIT_ORDER
     })
   }
 })

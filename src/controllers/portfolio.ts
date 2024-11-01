@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import portfolioService from '../services/portfolio'
+import { ErrorCodeEnum, StatusCodeEnum } from '../enums/http'
 
 class PortfolioController {
   static async getPortfolio(req: Request, res: Response) {
@@ -9,10 +10,10 @@ class PortfolioController {
 
       const portfolio = await portfolioService.getPortfolio(userId)
 
-      res.status(200).json({ portfolio })
+      res.status(StatusCodeEnum.OK).json({ portfolio })
 
-    } catch (error: any) {
-      res.status(500).json({ message: error.message })
+    } catch (error) {
+      res.status(StatusCodeEnum.INTERNAL_SERVER_ERROR).json({ error: ErrorCodeEnum.INTERNAL_SERVER_ERROR })
     }
   }
 }

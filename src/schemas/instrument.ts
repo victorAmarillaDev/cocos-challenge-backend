@@ -1,10 +1,11 @@
 import { z } from 'zod'
+import { CustomErrorCodeEnum } from '../enums/http'
 
 export const InstrumentSearchQuerySchema = z.object({
   ticker: z.string().optional(),
   name: z.string().optional()
 }).refine((data) => data.ticker || data.name, {
-  message: "At least one of the 'ticker' or 'name' fields must be present.",
+  message: CustomErrorCodeEnum.MISSING_TICKER_OR_NAME,
   path: []
 })
 
