@@ -1,4 +1,4 @@
-import { number, z } from 'zod'
+import { z } from 'zod'
 
 export const UserParamsSchema = z.object({
  userId: z.string().regex(/^\d+$/).transform(Number)

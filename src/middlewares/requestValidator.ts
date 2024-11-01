@@ -54,3 +54,24 @@ export const paramsUserValidator = async <T extends ZodSchema<{ params: any }>>(
     res.status(400).json({ message: error.message })
   }
 }
+
+export const querySearchInstrumentsValidator = async <T extends ZodSchema<{ query: any }>>(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  schema: T
+): Promise<void> => {
+  try {
+    const result = schema.safeParse(req)
+
+    if (!result.success) {
+      throw result.error
+    }
+
+    req.query = result.data.query
+
+    return next()
+  } catch (error: any) {
+    res.status(400).json({ message: error.message })
+  }
+}
