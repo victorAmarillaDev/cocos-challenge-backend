@@ -2,17 +2,21 @@ import { z } from 'zod'
 import { getLastPrice } from '../utils/instrument'
 import { OrderSide, OrderType, OrderStatus } from '../enums/order'
 import { CustomErrorCodeEnum } from '../enums/http'
+import moment from 'moment'
+
+const positiveNumberWithCode = (field: string, code: CustomErrorCodeEnum) =>
+  z.number().positive({ message: code }).int({ message: code })
 
 export const OrderCreateSchema = z.object({
-  instrumentId: z.number().positive().int(),
-  side: z.nativeEnum(OrderSide),
-  size: z.number().positive().int(),
-  price: z.number().positive().optional(),
-  type: z.nativeEnum(OrderType),
-  userId: z.number().positive().int(),
-  status: z.nativeEnum(OrderStatus).optional()
+  instrumentId: positiveNumberWithCode('Instrument ID', CustomErrorCodeEnum.INVALID_INSTRUMENT_ID),
+  side: z.nativeEnum(OrderSide, { errorMap: () => ({ message: CustomErrorCodeEnum.INVALID_ORDER_SIDE }) }),
+  size: positiveNumberWithCode('Size', CustomErrorCodeEnum.INVALID_SIZE),
+  price: z.number().positive({ message: CustomErrorCodeEnum.INVALID_PRICE }).optional(),
+  type: z.nativeEnum(OrderType, { errorMap: () => ({ message: CustomErrorCodeEnum.INVALID_ORDER_TYPE }) }),
+  userId: positiveNumberWithCode('User ID', CustomErrorCodeEnum.INVALID_USER_ID),
+  status: z.nativeEnum(OrderStatus).optional(),
+  dateTime: z.string().date().optional()
 }).superRefine(async (order, ctx) => {
-
   if ((order.side === OrderSide.BUY || order.side === OrderSide.SELL) && order.type === OrderType.MARKET) {
     const price = await getLastPrice(order.instrumentId)
     if (!price) {
@@ -37,6 +41,9 @@ export const OrderCreateSchema = z.object({
       message: CustomErrorCodeEnum.PRICE_REQUIRED_FOR_LIMIT_ORDER
     })
   }
+
+  const currentDate = moment()
+  order.dateTime = currentDate.format('YYYY-MM-DD')
 })
 
 export const createOrderSchema = z.object({
