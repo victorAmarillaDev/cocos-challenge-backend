@@ -1,26 +1,24 @@
 import { AppDataSource } from '../config/db'
-import { Order } from '../entity/Order'
-import { OrderParams } from '../interfaces/order'
-import { DeepPartial } from 'typeorm'
+import {  IOrder, Order, IOrderCreate } from '../entity/Order'
 
 class OrderService {
   private orderRepository = AppDataSource.getRepository(Order)
 
-  public async createOrder(order: OrderParams) {
+  public async createOrder(order: Omit<IOrder, 'instrumentId' | 'userId'> & {
+    instrumentId: number,
+    userId: number
+  }) {
     const { userId, instrumentId, ...orderData } = order
 
-    const newOrder: DeepPartial<Order> = {
+    const newOrder: IOrderCreate = {
       ...orderData,
       instrumentId: { id: instrumentId },
       userId: { id: userId },
-      price: order.price.toString(),
-      datetime: new Date()
+      price: order.price.toString()
     }
 
     return this.orderRepository.save(newOrder)
-
   }
-  
 }
 
 export default new OrderService()

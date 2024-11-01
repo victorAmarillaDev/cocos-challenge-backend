@@ -3,7 +3,7 @@ import portfolioService from '../services/portfolio'
 
 class PortfolioController {
   static async getPortfolio(req: Request, res: Response) {
-    const userId = parseInt(req.params.userId)
+    const userId = req.params.userId as unknown as number
 
     try {
 

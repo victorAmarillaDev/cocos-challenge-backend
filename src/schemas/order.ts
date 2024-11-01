@@ -1,37 +1,38 @@
 import { z } from 'zod'
 import { getLastPrice } from '../utils/instrument'
+import { OrderSide, OrderType, OrderStatus } from '../enums/order'
 
 export const OrderCreateSchema = z.object({
   instrumentId: z.number().positive().int(),
-  side: z.enum(['BUY', 'SELL', 'CASH_IN', 'CASH_OUT']),
+  side: z.nativeEnum(OrderSide),
   size: z.number().positive().int(),
   price: z.number().positive().optional(),
-  type: z.enum(['LIMIT', 'MARKET']),
+  type: z.nativeEnum(OrderType),
   userId: z.number().positive().int(),
-  status: z.enum(['NEW', 'FILLED', 'REJECTED', 'CANCELLED']).optional()
+  status: z.nativeEnum(OrderStatus).optional()
 }).superRefine(async (order, ctx) => {
 
-  if ((order.side === 'BUY' || order.side === 'SELL') && order.type === 'MARKET') {
+  if ((order.side === OrderSide.BUY || order.side === OrderSide.SELL) && order.type === OrderType.MARKET) {
     const price = await getLastPrice(order.instrumentId)
     if (!price) {
       ctx.addIssue({
         code: "custom",
-        path: ['Instrument'],
+        path: ['instrumentId'],
         message: 'Instrument not found'
       })
     }
     order.price = price?.close
-    order.status = 'FILLED'
+    order.status = OrderStatus.FILLED
   }
 
-  if (order.type === 'LIMIT') {
-    order.status = 'NEW'
+  if (order.type === OrderType.LIMIT) {
+    order.status = OrderStatus.NEW
   }
 
-  if (order.type === 'LIMIT' && !order.price) {
+  if (order.type === OrderType.LIMIT && !order.price) {
     ctx.addIssue({
       code: "custom",
-      path: ['Price'],
+      path: ['price'],
       message: 'Price is required for LIMIT orders'
     })
   }

@@ -1,9 +1,17 @@
-import { Request, Response, NextFunction } from 'express'
-import Zod from 'zod'
+import { Request, Response, NextFunction } from 'express';
+import {  ZodSchema } from 'zod';
+import { IOrderData } from '../interfaces/order'
 
-export const requestValidator = async <T extends Zod.Schema<{ body: any }>>
-(req: Request, res: Response, next: NextFunction, schema: T): Promise<void> => {
-  const body = req.body
+export const requestValidator = async <T extends ZodSchema<{ body: any }>>(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  schema: T
+): Promise<void> => {
+  
+  const body: Omit<IOrderData, 'status' | 'price' | 'dateTime'> & {
+    price?: string
+  }= req.body
 
   try {
     const validatedRequest = await schema.parseAsync({ body })
@@ -12,8 +20,29 @@ export const requestValidator = async <T extends Zod.Schema<{ body: any }>>
 
     next()
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(400).json({ message: error.message })
     return
   }
+}
 
+export const paramsUserValidator = async <T extends ZodSchema<{ params: any }>>(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  schema: T
+): Promise<void> => {
+  try {
+
+    const result = schema.safeParse(req)
+
+    if (!result.success) {
+      throw result.error
+    }
+
+    req.params = result.data.params
+
+    return next()
+  } catch (error: any) {
+    res.status(400).json({ message: error.message })
+  }
 }
