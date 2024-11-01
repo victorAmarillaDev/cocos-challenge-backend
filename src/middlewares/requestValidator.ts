@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import {  ZodSchema } from 'zod';
+import { Request, Response, NextFunction } from 'express'
+import { ZodSchema } from 'zod'
 import { IOrderData } from '../interfaces/order'
 import { checkUserExists } from '../utils/user'
 
@@ -9,10 +9,10 @@ export const requestValidator = async <T extends ZodSchema<{ body: any }>>(
   next: NextFunction,
   schema: T
 ): Promise<void> => {
-  
+
   const body: Omit<IOrderData, 'status' | 'price' | 'dateTime'> & {
     price?: string
-  }= req.body
+  } = req.body
 
   try {
     const validatedRequest = await schema.parseAsync({ body })
@@ -43,7 +43,7 @@ export const paramsUserValidator = async <T extends ZodSchema<{ params: any }>>(
     const userExists = await checkUserExists(result.data.params.userId)
 
     if (!userExists) {
-      res.status(404).json({ message: 'User not found'})
+      res.status(404).json({ message: 'User not found' })
       return
     }
 
