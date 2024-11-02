@@ -1,13 +1,11 @@
 import { AppDataSource } from '../config/db'
-import {  IOrder, Order, IOrderCreate } from '../entity/Order'
+import { Order, IOrderCreate } from '../entity/Order'
+import { IOrderData } from '../interfaces/order'
 
 class OrderService {
   private orderRepository = AppDataSource.getRepository(Order)
 
-  public async createOrder(order: Omit<IOrder, 'instrumentId' | 'userId'> & {
-    instrumentId: number,
-    userId: number
-  }) {
+  public async createOrder(order: IOrderData) {
     const { userId, instrumentId, ...orderData } = order
 
     const newOrder: IOrderCreate = {
