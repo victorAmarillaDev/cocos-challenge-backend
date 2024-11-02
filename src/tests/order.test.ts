@@ -1,9 +1,6 @@
 import request from 'supertest'
 import app from '../app'
-import { OrderStatus } from '../enums/order'
-import OrderService from '../services/order'
 import { AppDataSource } from '../config/db'
-import { string } from 'zod'
 
 describe('POST /api/order - Create Order', () => {
 
@@ -70,7 +67,8 @@ describe('POST /api/order - Create Order', () => {
       instrumentId: 999,
       side: 'BUY',
       size: 5,
-      type: 'MARKET',
+      type: 'LIMIT',
+      price: 12,
       userId: 1
     }
   
