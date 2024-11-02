@@ -1,8 +1,10 @@
+import moment from 'moment'
 import { AppDataSource } from '../config/db'
 import { Instrument } from '../entity/Instrument'
 import { MarketData } from '../entity/Marketdata'
 import { Order } from '../entity/Order'
 import lodash from 'lodash'
+import { fifo, roi } from '../utils/order'
 
 interface OrderWithMarketData extends Omit<Order, 'instrumentId'> {
   instrumentId: Instrument & {
@@ -93,33 +95,26 @@ class PortfolioService {
       .groupBy(order => order.instrumentId.ticker)
       .map((listOrder) => {
         const { ticker, name, type, id } = listOrder[0].instrumentId
-
+      
         const totalBought = lodash.sumBy(listOrder.filter(o => o.side === 'BUY'), order => order.size)
         const totalSold = lodash.sumBy(listOrder.filter(o => o.side === 'SELL'), order => order.size)
         const quantity = totalBought - totalSold
-
+      
         if (quantity <= 0) return null
+      
+        const currentClosePrice = Number(listOrder[0].instrumentId.marketdata?.close ?? 0)
 
-        const currentClosePrice = listOrder[0].instrumentId.marketdata?.close ?? 0
         const currentValue = quantity * currentClosePrice
+      
+        const buyOrdersForTime = listOrder.filter((o) => o.side === 'BUY').sort((a, b) => moment(a.dateTime).diff(b.dateTime))
+        const sellOrdersForTime = listOrder.filter((o) => o.side === 'SELL').sort((a, b) => moment(a.dateTime).diff(b.dateTime))
 
-        // First In, First Out
-        let remainingQuantity = quantity
-        let totalPurchaseValue = 0
+        const remainingOrders = fifo(buyOrdersForTime, sellOrdersForTime)
+      
+        const originalCost = lodash.sumBy(remainingOrders, (order) => order.size * Number(order.price))
 
-        for (const order of listOrder.filter(o => o.side === 'BUY')) {
-          if (remainingQuantity <= 0) break
-
-          const buyQuantity = Math.min(order.size, remainingQuantity)
-
-          totalPurchaseValue += buyQuantity * parseFloat(order.price)
-          remainingQuantity -= buyQuantity
-        }
-
-        const performance = totalPurchaseValue > 0
-          ? ((currentValue - totalPurchaseValue) / totalPurchaseValue) * 100
-          : 0
-
+        const performance = roi(currentValue, originalCost)
+      
         return {
           id,
           ticker,
